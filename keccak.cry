@@ -8,21 +8,20 @@ SHA_3_512 M = take(512, Keccak `{r = 576, c = 1024} M);
 
 Keccak : {r c m}
   ( fin r, fin c, fin m
-  , r >= 1, c >= 1, m >= 0
+  , r >= 0, c >= 0, m >= 0
   , fin ((r + m + 1) / r)
-  , r >= (r + c)/25 - 1
+  , (r + m + 1) / r >= 0
+  , (r + m + 1) / r * r - m >= 2
+  , 64 >= (r + c) / 25
   , 25 * ((r + c) / 25) >= r
-  , (m + r + 1)/r >= 0
-  , (m + r + 1)/r * r - m >= 2
-  , 64 >= (r+c)/25
   ) => [m] -> [inf];
 Keccak M = squeeze `{r = r} (absorb `{w = (r + c) / 25} Ps)
   where Ps = pad `{r = r} M;
 
-squeeze : {r w} (fin r, fin w, 64 >= w, r >= 0, 25*w >= r) => [5][5][w] -> [inf];
+squeeze : {r w} (fin r, fin w, 64 >= w, r >= 0, 25 * w >= r) => [5][5][w] -> [inf];
 squeeze A = take(`r, flatten A) # squeeze `{r = r} (Keccak_f A);
 
-absorb : {r w n} (fin r, fin w, fin n, r >= w - 1, 25 * w >= r, 64 >= w) => [n][r] -> [5][5][w];
+absorb : {r w n} (fin r, fin w, fin n, 64 >= w, 25 * w >= r) => [n][r] -> [5][5][w];
 absorb Ps = as ! 0
   where {
     as = [zero] # [| Keccak_f `{w = w} (s ^ (unflatten p)) || s <- as || p <- Ps |];
@@ -30,7 +29,7 @@ absorb Ps = as ! 0
 
 pad : {r m n}
   ( fin r, fin m, fin n
-  , n == (m + r + 1)/r
+  , n == (r + m + 1) / r
   , r * n - m >= 2
   ) => [m] -> [n][r];
 pad M = split (M # [True] # zero # [True]);
