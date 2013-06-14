@@ -35,7 +35,7 @@ pad : {r m n}
   ) => [m] -> [n][r];
 pad M = split (M # [True] # zero # [True]);
 
-Keccak_f : {w} (fin w, 64 >= w) => [5][5][w] -> [5][5][w];
+Keccak_f : {b w} (fin w, b == 25 * w, 64 >= w) => [5][5][w] -> [5][5][w];
 Keccak_f A = rounds ! 0
   where {
     rounds = [A] # [| Round RC A || RC <- RCs `{w = w} || A <- rounds |];
