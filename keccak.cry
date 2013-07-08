@@ -104,6 +104,6 @@ unflatten p = transpose(groupBy(5, groupBy(`w, p # zero)));
 flatten : {r w} [5][5][w] -> [5 * 5 * w];
 flatten A = join (join (transpose A));
 
-xor : {a b} [a][b] -> [b];
-xor xs = xors @ width xs
+xor : {a b} (fin a) => [a][b] -> [b];
+xor xs = xors ! 0
   where xors = [0] # [| x ^ z || x <- xs || z <- xors |];
